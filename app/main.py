@@ -1,15 +1,39 @@
 import bottle
 import os
-
+import heatMap
+import pathing
+import random
 
 @bottle.route('/static/<path:path>')
 def static(path):
     return bottle.static_file(path, root='static/')
 
+def getOurSnake(data):
+    SNAKE_ID = "6f8ded38-bd5c-41cf-b894-5b2152c1d8bd"
+    ourSnake = None
+    snakes = data['snakes']
+    for snake in snakes:
+        if snake["id"] == SNAKE_ID:
+            ourSnake = snake
+            break
+
+    return ourSnake
+
+def getSnakePosition(data):
+    SNAKE_ID = "6f8ded38-bd5c-41cf-b894-5b2152c1d8bd"
+    ourSnake = None
+    snakes = data['snakes']
+    for snake in snakes:
+        if snake["id"] == SNAKE_ID:
+            ourSnake = snake
+            break
+
+    return ourSnake['coords'][0]
+
 
 @bottle.get('/')
 def index():
-    head_url = '%s://%s/static/head.png' % (
+    head_url = '%s://%s/static/dad.jpg' % (
         bottle.request.urlparts.scheme,
         bottle.request.urlparts.netloc
     )
@@ -27,19 +51,42 @@ def start():
     # TODO: Do things with data
 
     return {
-        'taunt': 'battlesnake-python!'
+        'taunt': ""
     }
 
 
 @bottle.post('/move')
 def move():
+
+    taunts = [
+        'That\'s not a good to get a head',
+        'Donut be angry',
+        'I had a pizza joint once. It didn\'t pan out',
+        'Don\'t call me later.  Call me dad.',
+        'What time is it? I don\'t know, it keeps changing.',
+
+    ]
+
     data = bottle.request.json
 
-    # TODO: Do things with data
+    height = data["height"]
+    width = data["width"]
+
+    ourHeatMap = heatMap.heatMap(width, height)
+    board = ourHeatMap.getHeatMap(data, getOurSnake(data))
+    goal = ourHeatMap.getGoal()
+    position = getSnakePosition(data)
+    board[position[0]][position[1]] = 1000000
+
+    direction = pathing.find_path_direction(board, width, height, position, goal)
+    print board
+    print position
+    print goal
+    print direction
 
     return {
-        'move': 'north',
-        'taunt': 'battlesnake-python!'
+        'move': direction,
+        'taunt': random.choice(taunts)
     }
 
 
