@@ -40,6 +40,7 @@ class heatMap:
                 self.fillRadius(point[0], point[1], radius, radiusAmount)
 
     def fillHeatMap(self, data, ourSnake):
+        self.board = [[2 for x in range(self.width)] for x in range(self.height)]
         self.fillSnakes(data['snakes'], ourSnake)
         self.fillFood(data['food'])
 
